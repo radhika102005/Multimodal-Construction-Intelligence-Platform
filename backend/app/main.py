@@ -1,3 +1,4 @@
+
 """
 Main FastAPI Application Entrypoint.
 Configured for high performance, modular architecture, and low-memory execution
@@ -36,8 +37,8 @@ app = FastAPI(
         "Safety Auditing, Structural Crack Forensics, Valuation, and Site Intelligence."
     ),
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
+    docs_url="/docs" if settings.ENVIRONMENT == "development" else None,
+    redoc_url="/redoc" if settings.ENVIRONMENT == "development" else None
 )
 
 # -------------------------------------------------------------

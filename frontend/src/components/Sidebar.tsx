@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
@@ -11,8 +12,7 @@ import {
   BookOpenCheck,
   HardHat,
   Cpu,
-  ChevronRight,
-  ExternalLink
+  ChevronRight
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -131,27 +131,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, aiConfigured 
             </div>
             <p className="text-[11px] text-slate-400 leading-tight">
               {aiConfigured
-                ? 'Gemini Multimodal Vision Active'
+                ? 'Groq Multimodal AI Active'
                 : 'Benchmark Civil Heuristics Mode'}
             </p>
             {!aiConfigured && (
               <p className="text-[10px] text-amber-400/90 mt-1">
-                Set AI_API_KEY in backend/.env for live vision
+                Configure Groq API settings on the backend for live AI.
               </p>
             )}
           </div>
 
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 px-1">
             <span>Render 512MB RAM Ready</span>
-            <a
-              href="/docs"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center hover:text-slate-300 transition-colors"
-            >
-              Swagger Docs
-              <ExternalLink className="w-3 h-3 ml-1" />
-            </a>
           </div>
         </div>
       </aside>
