@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Menu, Activity, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
+import { Menu, Zap, AlertCircle } from 'lucide-react';
 import { HealthStatus } from '../types';
 
 interface HeaderProps {
@@ -34,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Right section: System health, AI status badge, Swagger link */}
+      {/* Right section: System health and AI status */}
       <div className="flex items-center space-x-3 sm:space-x-4">
         {/* Render Backend Connection Indicator */}
         <div
@@ -71,18 +72,6 @@ export const Header: React.FC<HeaderProps> = ({
             {health?.ai_configured ? health.ai_model : 'Civil Heuristic Fallback'}
           </span>
         </div>
-
-        {/* Swagger Docs Pill */}
-        <a
-          href="/docs"
-          target="_blank"
-          rel="noreferrer"
-          className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1"
-        >
-          <Activity className="w-3.5 h-3.5 text-slate-500" />
-          <span className="hidden sm:inline">API</span>
-          <span>Swagger</span>
-        </a>
       </div>
     </header>
   );
