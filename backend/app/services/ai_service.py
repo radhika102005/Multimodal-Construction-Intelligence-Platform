@@ -1,6 +1,7 @@
+
 """
 Provider-independent AI Service Layer.
-Connects to Google Gemini API (default) or OpenAI-compatible multimodal endpoints
+Connects to Google Gemini, OpenAI, or Groq OpenAI-compatible multimodal endpoints
 using asynchronous HTTPX requests without loading heavy local models or PyTorch.
 Ensures compatibility with Render 512MB RAM constraints.
 """
@@ -44,6 +45,8 @@ class AIService:
                 return await self._call_gemini_vision(prompt, image_b64, mime_type, system_instruction)
             elif self.provider == "openai":
                 return await self._call_openai_vision(prompt, image_b64, mime_type, system_instruction)
+            elif self.provider == "groq":
+                return await self._call_openai_vision(prompt, image_b64, mime_type, system_instruction)
             else:
                 logger.warning(f"Unsupported AI provider: {self.provider}")
                 return None
@@ -68,6 +71,8 @@ class AIService:
             if self.provider == "gemini":
                 return await self._call_gemini_text(prompt, system_instruction, expect_json)
             elif self.provider == "openai":
+                return await self._call_openai_text(prompt, system_instruction, expect_json)
+            elif self.provider == "groq":
                 return await self._call_openai_text(prompt, system_instruction, expect_json)
             else:
                 return None
@@ -165,7 +170,7 @@ class AIService:
             return text_content.strip()
 
     # -------------------------------------------------------------
-    # OpenAI Implementations (Fallback provider)
+    # OpenAI / Groq Implementations
     # -------------------------------------------------------------
     async def _call_openai_vision(
         self,
@@ -174,7 +179,12 @@ class AIService:
         mime_type: str,
         system_instruction: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
-        url = "https://api.openai.com/v1/chat/completions"
+        url = (
+            "https://api.groq.com/openai/v1/chat/completions"
+            if self.provider == "groq"
+            else "https://api.openai.com/v1/chat/completions"
+        )
+
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -193,7 +203,9 @@ class AIService:
         })
 
         payload = {
-            "model": self.model if "gpt" in self.model else "gpt-4o-mini",
+            "model": self.model if self.provider == "groq" else (
+                self.model if "gpt" in self.model else "gpt-4o-mini"
+            ),
             "messages": messages,
             "temperature": 0.2,
             "response_format": {"type": "json_object"}
@@ -202,7 +214,7 @@ class AIService:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.post(url, headers=headers, json=payload)
             if resp.status_code != 200:
-                logger.error(f"OpenAI API error: {resp.text}")
+                logger.error(f"AI API error ({self.provider}): {resp.status_code}: {resp.text}")
                 return None
 
             data = resp.json()
@@ -215,7 +227,12 @@ class AIService:
         system_instruction: Optional[str] = None,
         expect_json: bool = False
     ) -> Optional[Any]:
-        url = "https://api.openai.com/v1/chat/completions"
+        url = (
+            "https://api.groq.com/openai/v1/chat/completions"
+            if self.provider == "groq"
+            else "https://api.openai.com/v1/chat/completions"
+        )
+
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -227,16 +244,20 @@ class AIService:
         messages.append({"role": "user", "content": prompt})
 
         payload: Dict[str, Any] = {
-            "model": self.model if "gpt" in self.model else "gpt-4o-mini",
+            "model": self.model if self.provider == "groq" else (
+                self.model if "gpt" in self.model else "gpt-4o-mini"
+            ),
             "messages": messages,
             "temperature": 0.4
         }
+
         if expect_json:
             payload["response_format"] = {"type": "json_object"}
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.post(url, headers=headers, json=payload)
             if resp.status_code != 200:
+                logger.error(f"AI API error ({self.provider}): {resp.status_code}: {resp.text}")
                 return None
 
             content = resp.json()["choices"][0]["message"]["content"]
