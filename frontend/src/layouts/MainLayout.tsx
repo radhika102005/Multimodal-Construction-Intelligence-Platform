@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
@@ -37,22 +38,17 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         aiConfigured={health?.ai_configured ?? false}
       />
 
-      {/* Main Content Area */}
       <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
         <Header
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          health={health}
-          isBackendAwake={isBackendAwake}
         />
 
-        {/* Global sleeping alert if Render is spinning up */}
         {!isBackendAwake && backendMessage && (
           <div className="p-4 sm:px-8 pb-0">
             <AlertBanner
